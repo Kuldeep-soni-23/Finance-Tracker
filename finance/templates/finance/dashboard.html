@@ -1,0 +1,786 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Hero Section -->
+
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 rounded-3xl p-10 shadow-2xl text-white">
+
+        <div class="flex flex-col lg:flex-row justify-between items-center">
+
+            <div>
+
+                <h1 class="text-5xl font-bold">
+                    Welcome Back,
+                </h1>
+
+                <h2 class="text-4xl mt-2 font-semibold">
+                    {{ request.user|capfirst }} 👋
+                </h2>
+
+                <p class="mt-4 text-lg opacity-90">
+                    Track your finances and achieve your goals effortlessly.
+                </p>
+
+                <div class="mt-8 flex gap-4">
+
+                    <a href="{% url 'transaction_add' %}"
+                        class="bg-white text-indigo-700 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition">
+
+                        ➕ Add Transaction
+
+                    </a>
+
+                    <a href="{% url 'goal_add' %}"
+                        class="bg-black/20 backdrop-blur-md px-6 py-3 rounded-xl hover:bg-black/30 transition">
+
+                        🎯 New Goal
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="mt-8 lg:mt-0">
+
+                <div
+                    class="bg-white/20 backdrop-blur-lg rounded-3xl p-8 text-center border border-white/30 shadow-xl">
+
+                    <h3 class="text-xl">
+                        Net Worth
+                    </h3>
+
+                    <p class="text-5xl font-bold mt-3">
+
+                        ₹{{ net_savings|floatformat:2 }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Statistics -->
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+
+        <!-- Income -->
+
+        <div
+            class="bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition duration-300">
+
+            <div class="flex justify-between items-center">
+
+                <div>
+
+                    <p class="text-gray-500">
+
+                        Total Income
+
+                    </p>
+
+                    <h2 class="text-4xl font-bold text-green-600 mt-3">
+
+                        ₹{{ total_income|floatformat:2 }}
+
+                    </h2>
+
+                </div>
+
+                <div
+                    class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-4xl">
+
+                    💰
+
+                </div>
+
+            </div>
+
+            <div class="mt-6">
+
+                <div class="w-full bg-green-100 rounded-full h-2">
+
+                    <div class="bg-green-500 h-2 rounded-full w-full"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Expense -->
+
+        <div
+            class="bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition duration-300">
+
+            <div class="flex justify-between">
+
+                <div>
+
+                    <p class="text-gray-500">
+
+                        Total Expense
+
+                    </p>
+
+                    <h2 class="text-4xl font-bold text-red-500 mt-3">
+
+                        ₹{{ total_expense|floatformat:2 }}
+
+                    </h2>
+
+                </div>
+
+                <div
+                    class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center text-4xl">
+
+                    💸
+
+                </div>
+
+            </div>
+
+            <div class="mt-6">
+
+                <div class="w-full bg-red-100 rounded-full h-2">
+
+                    <div class="bg-red-500 h-2 rounded-full w-3/4"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Savings -->
+
+        <div
+            class="bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition duration-300">
+
+            <div class="flex justify-between">
+
+                <div>
+
+                    <p class="text-gray-500">
+
+                        Net Savings
+
+                    </p>
+
+                    <h2 class="text-4xl font-bold text-indigo-600 mt-3">
+
+                        ₹{{ net_savings|floatformat:2 }}
+
+                    </h2>
+
+                </div>
+
+                <div
+                    class="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center text-4xl">
+
+                    📈
+
+                </div>
+
+            </div>
+
+            <div class="mt-6">
+
+                <div class="w-full bg-indigo-100 rounded-full h-2">
+
+                    <div class="bg-indigo-500 h-2 rounded-full w-2/3"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Analytics + Quick Actions -->
+
+    <div class="grid lg:grid-cols-3 gap-8 mt-10">
+
+        <div class="lg:col-span-2 bg-white rounded-3xl shadow-xl p-8">
+
+            <div class="flex justify-between items-center mb-6">
+
+                <h2 class="text-3xl font-bold">
+
+                    📊 Financial Analytics
+
+                </h2>
+
+                <span class="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full">
+
+                    Monthly Overview
+
+                </span>
+
+            </div>
+
+            <canvas id="financeChart" height="120"></canvas>
+
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl p-8">
+
+            <h2 class="text-2xl font-bold mb-6">
+
+                ⚡ Quick Actions
+
+            </h2>
+
+            <div class="space-y-4">
+
+                <a href="{% url 'transaction_add' %}"
+                    class="block bg-green-500 text-white rounded-xl p-4 text-center hover:bg-green-600 transition">
+
+                    ➕ Add Transaction
+
+                </a>
+
+                <a href="{% url 'transaction_list' %}"
+                    class="block bg-blue-500 text-white rounded-xl p-4 text-center hover:bg-blue-600 transition">
+
+                    📋 View Transactions
+
+                </a>
+
+                <a href="{% url 'goal_add' %}"
+                    class="block bg-purple-500 text-white rounded-xl p-4 text-center hover:bg-purple-600 transition">
+
+                    🎯 Create Goal
+
+                </a>
+
+                <a href="#"
+                    class="block bg-orange-500 text-white rounded-xl p-4 text-center hover:bg-orange-600 transition">
+
+                    📄 Reports
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- Recent Transactions -->
+
+    <div class="mt-10 bg-white rounded-3xl shadow-xl p-8">
+
+        <div class="flex justify-between items-center mb-8">
+
+            <h2 class="text-3xl font-bold text-gray-800">
+                🧾 Recent Transactions
+            </h2>
+
+            <a href="{% url 'transaction_list' %}"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl transition">
+
+                View All
+
+            </a>
+
+        </div>
+
+        {% if transactions %}
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full">
+
+                <thead>
+
+                    <tr class="border-b text-left">
+
+                        <th class="py-4">Title</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for transaction in transactions %}
+
+                    <tr class="border-b hover:bg-gray-50 transition">
+
+                        <td class="py-4 font-semibold">
+                            {{ transaction.title }}
+                        </td>
+
+                        <td>
+                            {{ transaction.category }}
+                        </td>
+
+                        <td>
+
+                            {% if transaction.transaction_type == "Income" %}
+
+                            <span
+                                class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+
+                                Income
+
+                            </span>
+
+                            {% else %}
+
+                            <span
+                                class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
+
+                                Expense
+
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td class="font-bold">
+
+                            ₹{{ transaction.amount }}
+
+                        </td>
+
+                        <td>
+
+                            {{ transaction.date }}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="text-center py-16">
+
+            <div class="text-7xl">
+                💳
+            </div>
+
+            <h2 class="text-2xl font-bold mt-4">
+
+                No Transactions Yet
+
+            </h2>
+
+            <p class="text-gray-500 mt-2">
+
+                Start by adding your first transaction.
+
+            </p>
+
+            <a href="{% url 'transaction_add' %}"
+                class="inline-block mt-6 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl">
+
+                Add Transaction
+
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <!-- Financial Goals -->
+
+    <div class="mt-10 bg-white rounded-3xl shadow-xl p-8">
+
+        <div class="flex justify-between items-center mb-8">
+
+            <h2 class="text-3xl font-bold text-gray-800">
+
+                🎯 Financial Goals
+
+            </h2>
+
+            <a href="{% url 'goal_add' %}"
+                class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl">
+
+                + New Goal
+
+            </a>
+
+        </div>
+
+        {% if goal_progress %}
+
+        <div class="space-y-6">
+
+            {% for item in goal_progress %}
+
+            <div class="border rounded-2xl p-6 hover:shadow-lg transition">
+
+                <div class="flex justify-between">
+
+                    <div>
+
+                        <h3 class="text-xl font-bold">
+
+                            {{ item.goal.name }}
+
+                        </h3>
+
+                        <p class="text-gray-500 mt-2">
+
+                            Target :
+                            ₹{{ item.goal.target_amount }}
+
+                        </p>
+
+                        <p class="text-gray-500">
+
+                            Deadline :
+                            {{ item.goal.deadline }}
+
+                        </p>
+
+                    </div>
+
+                    <div class="text-right">
+
+                        <span
+                            class="text-4xl font-bold text-indigo-600">
+
+                            {{ item.progress|floatformat:0 }}%
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-5 bg-gray-200 rounded-full h-4">
+
+                    <div
+                        class="bg-gradient-to-r from-green-400 via-indigo-500 to-purple-600 h-4 rounded-full"
+                        style="width: {{ item.progress }}%;">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="text-center py-16">
+
+            <div class="text-7xl">
+
+                🎯
+
+            </div>
+
+            <h2 class="text-2xl font-bold mt-4">
+
+                No Goals Created
+
+            </h2>
+
+            <p class="text-gray-500 mt-2">
+
+                Create your first financial goal today.
+
+            </p>
+
+            <a href="{% url 'goal_add' %}"
+                class="inline-block mt-6 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl">
+
+                Create Goal
+
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+        <!-- Bottom Section -->
+
+    <div class="grid lg:grid-cols-3 gap-8 mt-10">
+
+        <!-- Profile Card -->
+
+        <div class="bg-white rounded-3xl shadow-xl p-8">
+
+            <div class="text-center">
+
+                <div
+                    class="w-24 h-24 mx-auto rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-5xl text-white">
+
+                    👤
+
+                </div>
+
+                <h2 class="text-2xl font-bold mt-5">
+
+                    {{ request.user|capfirst }}
+
+                </h2>
+
+                <p class="text-gray-500 mt-2">
+
+                    Personal Finance Manager
+
+                </p>
+
+            </div>
+
+            <hr class="my-6">
+
+            <div class="space-y-4">
+
+                <div class="flex justify-between">
+
+                    <span>Total Income</span>
+
+                    <span class="font-bold text-green-600">
+
+                        ₹{{ total_income|floatformat:2 }}
+
+                    </span>
+
+                </div>
+
+                <div class="flex justify-between">
+
+                    <span>Total Expense</span>
+
+                    <span class="font-bold text-red-600">
+
+                        ₹{{ total_expense|floatformat:2 }}
+
+                    </span>
+
+                </div>
+
+                <div class="flex justify-between">
+
+                    <span>Net Savings</span>
+
+                    <span class="font-bold text-indigo-600">
+
+                        ₹{{ net_savings|floatformat:2 }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Tips -->
+
+        <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl text-white p-8 shadow-xl">
+
+            <h2 class="text-2xl font-bold mb-6">
+
+                💡 Finance Tip
+
+            </h2>
+
+            <p class="leading-8">
+
+                Save at least
+                <strong>20%</strong>
+                of your monthly income.
+
+                Track every expense.
+
+                Invest consistently.
+
+                Build an emergency fund.
+
+            </p>
+
+        </div>
+
+        <!-- Achievement -->
+
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl text-white p-8 shadow-xl">
+
+            <h2 class="text-2xl font-bold">
+
+                🏆 Achievement
+
+            </h2>
+
+            <div class="mt-6 space-y-4">
+
+                <div
+                    class="bg-white/20 rounded-xl p-4">
+
+                    <h3 class="font-semibold">
+
+                        Smart Saver
+
+                    </h3>
+
+                    <p class="text-sm">
+
+                        Keep your expenses lower than income.
+
+                    </p>
+
+                </div>
+
+                <div
+                    class="bg-white/20 rounded-xl p-4">
+
+                    <h3 class="font-semibold">
+
+                        Goal Setter
+
+                    </h3>
+
+                    <p class="text-sm">
+
+                        Create and complete your financial goals.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+
+    <footer class="mt-16 mb-8">
+
+        <div
+            class="bg-white rounded-3xl shadow-lg p-6 flex flex-col md:flex-row justify-between items-center">
+
+            <div>
+
+                <h2 class="text-xl font-bold text-indigo-600">
+
+                    💰 Finance Tracker
+
+                </h2>
+
+                <p class="text-gray-500">
+
+                    Track • Save • Grow
+
+                </p>
+
+            </div>
+
+            <div class="text-gray-500 mt-4 md:mt-0">
+
+                © 2026 Finance Tracker | Designed by
+                <span class="font-bold text-indigo-600">
+                    Kuldeep
+                </span>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+</div>
+
+<!-- Chart.js -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ctx = document.getElementById('financeChart');
+
+new Chart(ctx, {
+
+type:'bar',
+
+data:{
+
+labels:['Income','Expense','Savings'],
+
+datasets:[{
+
+label:'Financial Overview',
+
+data:[
+{{ total_income }},
+{{ total_expense }},
+{{ net_savings }}
+],
+
+backgroundColor:[
+'#22c55e',
+'#ef4444',
+'#4f46e5'
+],
+
+borderRadius:10
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+display:false
+}
+
+},
+
+scales:{
+
+y:{
+
+beginAtZero:true
+
+}
+
+}
+
+}
+
+});
+
+</script>
+
+{% endblock %}
